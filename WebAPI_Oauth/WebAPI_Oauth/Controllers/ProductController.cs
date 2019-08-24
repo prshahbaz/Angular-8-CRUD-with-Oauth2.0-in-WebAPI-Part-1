@@ -8,110 +8,83 @@ using WebAPI_Oauth.Models;
 
 namespace WebAPI_Oauth.Controllers
 {
-        [RoutePrefix("Api/Product")]
-        [Authorize]
+        [RoutePrefix("Api/Product")]//This is Route prefix filter which will be added in the url for this specfic controller
+        [Authorize]//This filter redirect the request to the provider class first request will authenticate if authentication sucessful than it will come to here
         public class ProductController : ApiController
         {
-            DataContext db = new DataContext();
             [HttpGet]
             [Route("GetProducts")]
-            public IQueryable<Product> GetProducts()
+            public List<Product> GetProducts()//This is th get method which get all the products from the db and return
             {
-                try
-                {
-                    //  using (var db = new TESTEntities())
-                    //  {
-                    return db.Products;
-                    //  }
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+            List<Product> productList = new List<Product>();
+            using (DataContext dataContext=new DataContext())
+            {
+                productList = dataContext.Products.ToList();
+            }
+            return productList;
             }
             [HttpGet]
             [Route("GetProductById/{Id}")]
-            public IHttpActionResult GetProductById(string Id)
-            {
+            public Product GetProductById(string Id)//This is th get method which get one record on the basis of ID 
+        {
                 Product product = new Product();
-                try
-                {
-                    int ID = Convert.ToInt32(Id);
-                    product = db.Products.Find(ID);
-                    if (product == null)
-                    {
-                        return NotFound();
-                    }
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-                return Ok(product);
+                using (DataContext dataContext = new DataContext())
+            {
+                product = dataContext.Products.Find(Convert.ToInt32(Id));
+            }              
+                return (product);
             }
             [HttpPost]
             [Route("InsertProduct")]
-            public IHttpActionResult Create(Product product)
+            public IHttpActionResult Create(Product product)//This method will insert the product into db
             {
-                try
+            using (DataContext dataContext = new DataContext())
+            {
+                if (!ModelState.IsValid)
                 {
-                    if (!ModelState.IsValid)
-                    {
-                        return BadRequest(ModelState);
-                    }
-                    else
-                    {
-                        db.Products.Add(product);
-                        db.SaveChanges();
-                        return Ok(product);
-                    }
+                    return BadRequest(ModelState);
                 }
-                catch (Exception)
+                else
                 {
-                    throw;
+                    dataContext.Products.Add(product);
+                    dataContext.SaveChanges();
+                    return Ok(product);
                 }
+            }               
             }
             [HttpPut]
             [Route("UpdateProduct")]
-            public IHttpActionResult Update(Product product)
+            public IHttpActionResult Update(Product product)//Update method will update the product
             {
-                try
+            using (DataContext dataContext = new DataContext())
+            {
+                if (ModelState.IsValid)
                 {
-                    if (ModelState.IsValid)
-                    {
-                        db.Entry(product).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
-                        return Ok(product);
-                    }
-                    else
-                    {
-                        return BadRequest(ModelState);
-                    }
+                    dataContext.Entry(product).State = System.Data.Entity.EntityState.Modified;
+                    dataContext.SaveChanges();
+                    return Ok(product);
                 }
-                catch (Exception)
+                else
                 {
-                    throw;
+                    return BadRequest(ModelState);
                 }
+            }                      
             }
             [HttpDelete]
             [Route("DeleteProduct/{Id}")]
-            public IHttpActionResult Delete(int Id)
+            public IHttpActionResult Delete(int Id)//this method will Delete the record
             {
-                try
+            using (DataContext dataContext = new DataContext())
+            {
+                Product product = dataContext.Products.Find(Convert.ToInt32(Id));
+                if (product == null) { return NotFound(); }
+                else
                 {
-                    Product product = db.Products.Find(Convert.ToInt32(Id));
-                    if (product == null) { return NotFound(); }
-                    else
-                    {
-                        db.Products.Remove(product);
-                        db.SaveChanges();
-                        return Ok(product);
-                    }
+                    dataContext.Products.Remove(product);
+                    dataContext.SaveChanges();
+                    return Ok(product);
                 }
-                catch (Exception)
-                {
-                    throw;
-                }
+            }                         
             }
         }
 }

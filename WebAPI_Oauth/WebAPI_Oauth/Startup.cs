@@ -16,12 +16,13 @@ namespace WebAPI_Oauth
         {
             public void ConfigureAuth(IAppBuilder app)
             {
-                app.UseCors(CorsOptions.AllowAll);
-                var OAuthOptions = new OAuthAuthorizationServerOptions
+                app.UseCors(CorsOptions.AllowAll);//this is very important line cross orgin source(CORS)it is used to enable cross-site HTTP requests  
+                                                  //For security reasons, browsers restrict cross-origin HTTP requests 
+            var OAuthOptions = new OAuthAuthorizationServerOptions
                 {
                     AllowInsecureHttp = true,
                     TokenEndpointPath = new PathString("/token"),
-                    AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(60),
+                    AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(60),//token expiration time
                     Provider = new OauthProvider()
                 };
 
@@ -30,7 +31,7 @@ namespace WebAPI_Oauth
                 app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions());
 
                 HttpConfiguration config = new HttpConfiguration();
-                WebApiConfig.Register(config);
+                WebApiConfig.Register(config);//register the request
             }
 
             public void Configuration(IAppBuilder app)
